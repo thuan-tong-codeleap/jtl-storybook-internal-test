@@ -1,0 +1,42 @@
+name: Deploy Storybook to GitHub Pages
+
+on:
+  workflow_call:
+    inputs:
+      directory:
+        description: 'The directory where the storybook should be deployed to'
+        required: false
+        type: string
+
+jobs:
+  deploy-storybook:
+    name: Deploy Storybook to GitHub Pages
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: 'yarn'
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Compile Translations
+        run: yarn compile-translations
+
+      - name: Build Storybook
+        run: export VITE_PUBLIC_COMPONENT_STORYBOOK_URL="/external/" && yarn storybook:build
+
+      - name: Deploy Storybook to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ inputs.directory }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./storybook-static
+          destination_dir: ${{ inputs.directory }}
+          keep_files: false

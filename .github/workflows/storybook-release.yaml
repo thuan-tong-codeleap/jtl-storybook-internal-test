@@ -1,0 +1,23 @@
+name: Storybook Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release
+      - main
+
+concurrency:
+  group: storybook-release
+  cancel-in-progress: false
+
+jobs:
+  deploy-storybook:
+    name: Deploy Storybook
+    uses: ./.github/workflows/workflow-storybook.yaml
+    permissions:
+      contents: write
+    with:
+      # Branch name is used as directory name
+      directory: ${{ github.ref_name }}/internal
+    secrets: inherit
